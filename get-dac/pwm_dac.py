@@ -11,16 +11,24 @@ class PWM_DAC:
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.gpio_pin, GPIO.OUT)
+
         self.pwm = GPIO.PWM(self.gpio_pin, self.pwm_frequency)
-        self.pwm.start
+        self.pwm.start(0)
+
+    def deinit(self):
+        self.pwm.stop()
+        GPIO.cleanup()
+
 
     def set_voltage(self, voltage):
-        if not( 0.0 <= voltage <= self.dynamic_range):
-            print(f"Напряжение выходит за динамический диапозон ЦАП (0.0 - {dynamic_range:.2f} В)")
-            print("Устанавливаем 0.0 В")
-            return 0
-        self.pwm.ChangeDutyCycle( voltage / self.dynamic_range * 100)    
-      
+        self.voltage = voltage
+
+
+        if voltage > self.dynamic_range or voltage <0:
+            print("cccc")
+
+        if 0.0 <= voltage <= self.dynamic_range:
+            print(f"коэф заполнения:{ (voltage / self.dynamic_range)*100} %")    
 
     if __name__ == "__main__":
         try:
