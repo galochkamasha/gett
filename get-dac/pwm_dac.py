@@ -30,17 +30,17 @@ class PWM_DAC:
         if 0.0 <= voltage <= self.dynamic_range:
             print(f"коэф заполнения:{ (voltage / self.dynamic_range)*100} %")    
 
-    if __name__ == "__main__":
-        try:
-            dac = PWM_DAC(12, 500, 3.290, True)
+if __name__ == "__main__":
+    try:
+        dac = PWM_DAC(12, 500, 3.290, True)
 
-            while True:
-                try:
-                    voltage = float(input("Введите напряжение в Вольтах: "))
-                    dac.set_voltage(voltage)
+        while True:
+            try:
+                voltage = float(input("Введите напряжение в Вольтах: "))
+                dac.set_voltage(voltage)
 
-                except ValueError:
-                    print("Вы ввели не то число. Попробуй еще \n")
+            except ValueError:
+                print("Вы ввели не то число. Попробуй еще \n")
 
-        finally:
-            dac.deinit()                
+    finally:
+        dac.deinit()                
