@@ -25,4 +25,21 @@ class R2R_DAC:
         bits = [int(bit) for bit in binary]
         return bits  
 
+
     def set_voltage(self, voltage):
+        if not (0.0 <= voltage <= self.dynamic_range):
+            print(f"Напряжение выходит за динамический диапазон ЦАП (0.00 - {self.dynamic_range: .2f} B)")
+            print("Устанавливаем 0.0 B\n")
+            self.set_number(0)
+
+if __name__ == "__main__":
+    try:
+        voltage = float(input("Введите напряжение в вольтах:"))
+        dac.set_voltage(voltage)
+
+    except ValueError:
+        print("Вы ввыели не число")
+
+
+    finally:
+        dac.deinit()        
