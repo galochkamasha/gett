@@ -11,7 +11,8 @@ try:
     starting_time = time.time()
 
     while True:
-        currect_time = time.time() - starting_timeDac.set_voltage(amplitude*sg.get_sin_wave_amplitude(signal_frequency, current_time))
+        current_time = time.time() - starting_time
+        DAC.set_voltage(amplitude*sg.get_sin_wave_amplitude(signal_frequency, current_time))
         sg.wait_for_sampling_period(sampling_frequency)
 finally:
     DAC.deinit()    
