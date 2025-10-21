@@ -3,108 +3,59 @@ import time
 
 class R2R_ADC:
     def __init__(self, dynamic_range, compare_time=0.01, verbose=False):
-
         self.dynamic_range = dynamic_range
         self.verbose = verbose
         self.compare_time = compare_time
         
-
         self.bits_gpio = [26, 20, 19, 16, 13, 12, 25, 11]
-
         self.comp_gpio = 21
+        self.DAC_BITS = len(self.bits_gpio)
+        self.max_dac_value = (1 << self.DAC_BITS) - 1
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.bits_gpio, GPIO.OUT, initial=0)
         GPIO.setup(self.comp_gpio, GPIO.IN)
-
-    def __del__(self): #деструктор
-
-        self.number_to_dac(0) 
-        GPIO.cleanup() 
-        if self.verbose:
-            print("GPIO очищен, ЦАП установлен в 0")
-
+    
+    def __del__(self):
+        self.deinit()
+    
+    def deinit(self):
+        GPIO.output(self.bits_gpio, 0)
+        GPIO.cleanup()
+    
     def number_to_dac(self, number):
-
-         
-        binary = format(number, '08b')
-        
-        if self.verbose:
-            print(f"Подаем число {number} ({binary}) на ЦАП")
-        
-        
-        for i, pin in enumerate(self.bits_gpio):
-            bit_value = int(binary[i]) 
-            GPIO.output(pin, bit_value)
-
+        for i in range(self.DAC_BITS):
+            bit = (number >> i) & 1
+            GPIO.output(self.bits_gpio[i], bit)
+    
     def sequential_counting_adc(self):
-
-       
-        max_number = 255
-        
-        if self.verbose:
-            print("Начинаем последовательное преобразование...")
-        
-
-        for number in range(max_number + 1):
-            
-            self.number_to_dac(number)
-            
+        for code in range(self.max_dac_value + 1):
+            self.number_to_dac(code)
             time.sleep(self.compare_time)
-            
-        
-            comparator_state = GPIO.input(self.comp_gpio)
-            
-            if self.verbose:
-                print(f"Число: {number}, Компаратор: {comparator_state}")
-         
-            if comparator_state == 0:
-                if self.verbose:
-                    print(f"Напряжение превышено при числе: {number}")
-                return number
-   
-        if self.verbose:
-            print("Достигнут максимум ЦАП")
-        return max_number
-
+            if GPIO.input(self.comp_gpio) == 0:
+                return code
+        return self.max_dac_value
+    
     def get_sc_voltage(self):
-
         digital_value = self.sequential_counting_adc()
-        
-     
-        voltage = (digital_value / 255.0) * self.dynamic_range
-        
-        if self.verbose:
-            print(f"Цифровое значение: {digital_value}, Напряжение: {voltage:.3f} В")
-        
+        voltage = (digital_value / self.max_dac_value) * self.dynamic_range
         return voltage
 
-
-
-if __name__ == "__main__":
+def main():
     try:
-       
-        adc = R2R_ADC(dynamic_range=3.3, compare_time=0.01, verbose=True)
+        adc = R2R_ADC(dynamic_range=3.3)
         
-        print("АЦП запущен. Для остановки нажмите Ctrl+C")
-        
-
         while True:
-         
             voltage = adc.get_sc_voltage()
-            
-        
-            print(f"Измеренное напряжение: {voltage:.3f} В")
-            
-     
-            time.sleep(1)
+            print(f"Напряжение: {voltage:.3f} В")
+            time.sleep(0.5)
             
     except KeyboardInterrupt:
-    
-        print("\nПрограмма остановлена пользователем")
+        print("\nОстановлено")
         
     finally:
-
         if 'adc' in locals():
-            del adc  
-        print("Программа завершена, ресурсы освобождены")
+            adc.deinit()
+
+if __name__ == "__main__":
+    main()
