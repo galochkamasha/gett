@@ -1,4 +1,4 @@
-import r2r_dac as r2r
+import pwm_dac
 import signal_generator as sg
 import time
 
@@ -7,7 +7,7 @@ signal_frequency = 10
 sampling_frequency = 1000
 
 try:
-    DAC = r2r.R2R_DAC([16, 20, 21, 25, 26, 17, 27, 22], 3.3, True)
+    DAC = pwm_dac.PWM_DAC(12, signal_frequency, 3.290, True)
     starting_time=time.time()
     while True:
         current_time = time.time() - starting_time

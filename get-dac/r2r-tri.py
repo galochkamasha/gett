@@ -1,5 +1,5 @@
 import r2r_dac as r2r
-import signal_generator as sg
+import triangle_generator as trig
 import time
 
 amplitude = 3.2
@@ -11,7 +11,7 @@ try:
     starting_time=time.time()
     while True:
         current_time = time.time() - starting_time
-        DAC.set_voltage(amplitude*sg.get_sin_wave_amplitude(signal_frequency, current_time))
-        sg.wait_for_sampling_period(sampling_frequency)
+        DAC.set_voltage(amplitude*trig.get_triangle_wave_amplitude(signal_frequency, current_time))
+        trig.wait_for_sampling_period(sampling_frequency)
 finally:
     DAC.deinit()
